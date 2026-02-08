@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Shopping - App de Compras</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🛒 Market Shopping</h1>
+            <p>Controla tus compras del mercado</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Tarjeta de configuración inicial -->
+            <section class="card config-card">
+                <h2>⚙️ Configuración de Compra</h2>
+                
+                <div class="form-group">
+                    <label for="tasaCambio">Tasa de Cambio ($):</label>
+                    <input type="number" id="tasaCambio" step="0.01" min="0" placeholder="Ej: 35.50" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha">Fecha de Compra:</label>
+                    <input type="date" id="fecha" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="automercado">Automercado:</label>
+                    <div class="mercado-selector">
+                        <select id="automercado" required>
+                            <option value="">Seleccione un automercado...</option>
+                        </select>
+                        <button type="button" id="btnAgregarMercado" class="btn btn-small btn-secondary" title="Agregar nuevo mercado">
+                            <span class="material-icons">add</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Botón para agregar productos -->
+            <button id="btnAgregarProducto" class="btn btn-primary" disabled>
+                <span class="material-icons">add</span>
+                Agregar Producto
+            </button>
+            <p id="mensajeConfiguracion" class="config-warning">⚠️ Complete la configuración inicial para poder agregar productos</p>
+
+            <!-- Lista de productos -->
+            <section class="card">
+                <h2>📦 Productos Agregados</h2>
+                <div id="listaProductos" class="product-list">
+                    <p class="empty-message">No hay productos agregados</p>
+                </div>
+            </section>
+
+            <!-- Totales -->
+            <section class="card totals-card">
+                <h2>💰 Totales</h2>
+                <div class="totals">
+                    <div class="total-item">
+                        <span>Total ($):</span>
+                        <span id="totalDolares" class="amount">$0.00</span>
+                    </div>
+                    <div class="total-item">
+                        <span>Total (Bs):</span>
+                        <span id="totalBolivares" class="amount">Bs0.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <button id="btnGuardar" class="btn btn-success">
+                    <span class="material-icons">save</span>
+                    Guardar Compra
+                </button>
+                <button id="btnCargar" class="btn btn-info">
+                    <span class="material-icons">folder_open</span>
+                    Ver Compras
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para agregar producto -->
+    <div id="modalProducto" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ Agregar Producto</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="nombreProducto">Nombre del Producto:</label>
+                    <input type="text" id="nombreProducto" placeholder="Ej: Arroz" required>
+                </div>
+                <div class="form-group">
+                    <label for="precioProducto">Precio:</label>
+                    <input type="number" id="precioProducto" step="0.01" min="0" placeholder="Ej: 2.50" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Medida:</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="tipoMedida" value="unidad" checked>
+                            <span>Por Unidad</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="tipoMedida" value="peso">
+                            <span>Por Peso (kg)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cantidadProducto">Cantidad:</label>
+                    <input type="number" id="cantidadProducto" step="0.01" min="0.01" placeholder="Ej: 3 (unidades) o 1.5 (kg)" required>
+                    <small id="ayudaCantidad" class="form-help">Ingrese el número de unidades o el peso en kg</small>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Moneda:</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="tipoMoneda" value="dolar" checked>
+                            <span>Dólares ($)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="tipoMoneda" value="bolivar">
+                            <span>Bolívares (Bs)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelarProducto" class="btn btn-secondary">Cancelar</button>
+                <button id="btnAceptarProducto" class="btn btn-primary">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar producto -->
+    <div id="modalEditarProducto" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Editar Producto</h3>
+                <span class="close-editar">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editarNombreProducto">Nombre del Producto:</label>
+                    <input type="text" id="editarNombreProducto" placeholder="Ej: Arroz" required>
+                </div>
+                <div class="form-group">
+                    <label for="editarPrecioProducto">Precio:</label>
+                    <input type="number" id="editarPrecioProducto" step="0.01" min="0" placeholder="Ej: 2.50" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Medida:</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="editarTipoMedida" value="unidad" checked>
+                            <span>Por Unidad</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="editarTipoMedida" value="peso">
+                            <span>Por Peso (kg)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editarCantidadProducto">Cantidad:</label>
+                    <input type="number" id="editarCantidadProducto" step="0.01" min="0.01" placeholder="Ej: 3 (unidades) o 1.5 (kg)" required>
+                    <small id="editarAyudaCantidad" class="form-help">Ingrese el número de unidades o el peso en kg</small>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Moneda:</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="editarTipoMoneda" value="dolar" checked>
+                            <span>Dólares ($)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="editarTipoMoneda" value="bolivar">
+                            <span>Bolívares (Bs)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelarEditarProducto" class="btn btn-secondary">Cancelar</button>
+                <button id="btnAceptarEditarProducto" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar mercado -->
+    <div id="modalAgregarMercado" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏪 Agregar Nuevo Automercado</h3>
+                <span class="close-agregar-mercado">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="nombreNuevoMercado">Nombre del Automercado:</label>
+                    <input type="text" id="nombreNuevoMercado" placeholder="Ej: Mi Mercado Local" required>
+                    <small class="form-help">Ingrese el nombre del nuevo automercado que desea agregar</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelarAgregarMercado" class="btn btn-secondary">Cancelar</button>
+                <button id="btnAceptarAgregarMercado" class="btn btn-primary">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver compras -->
+    <div id="modalCompras" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📋 Compras Guardadas</h3>
+                <span class="close-compras">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="listaCompras" class="compras-list">
+                    <p class="empty-message">No hay compras guardadas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
