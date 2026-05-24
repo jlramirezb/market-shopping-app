@@ -731,6 +731,11 @@ class MarketShoppingApp {
 // Inicializar la aplicación
 const app = new MarketShoppingApp();
 
+// Registrar Service Worker para funcionamiento offline
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 // Agregar animaciones CSS
 const style = document.createElement('style');
 style.textContent = `

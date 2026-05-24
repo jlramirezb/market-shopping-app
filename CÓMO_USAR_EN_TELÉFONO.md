@@ -1,5 +1,10 @@
 # Guía para Acceder a Market Shopping desde tu Teléfono
 
+> **📱 La app ahora funciona como PWA (Progressive Web App).**
+> Puedes instalarla en la pantalla de inicio y usarla 100% offline.
+
+---
+
 ## 🌐 Opción 1: Servidor Local vía WiFi (Recomendado)
 
 ### Requisitos:
@@ -152,18 +157,26 @@
 
 ---
 
-## 📱 Agregar a Pantalla de Inicio (iOS/Android)
+## 📱 Agregar a Pantalla de Inicio (PWA)
+
+La app ahora es una **Progressive Web App (PWA)**, lo que significa que se ve y funciona como una app nativa.
 
 ### **En Chrome (Android):**
 1. Abre la app en el navegador
-2. Click en los tres puntos (⋮)
-3. "Agregar a pantalla de inicio"
-4. Confirma nombre y agrega
+2. Espera que aparezca el banner "Agregar a pantalla de inicio"
+3. O toca los tres puntos (⋮) → "Agregar a pantalla de inicio"
+4. Confirma y ¡listo!
 
 ### **En Safari (iOS):**
 1. Abre la app en Safari
-2. Click en el ícono de compartir (📤)
-3. "Agregar a pantalla de inicio"
-4. Confirma y agrega
+2. Toca el ícono de compartir (📤)
+3. Desplázate y toca "Agregar a pantalla de inicio"
+4. Confirma y ¡listo!
 
-¡Listo! Tu app se verá como una aplicación nativa.
+### **En PC (Chrome/Edge):**
+1. Abre la app
+2. Haz clic en el ícono de instalación en la barra de direcciones
+3. Confirma
+
+### ✅ Totalmente Offline
+Una vez instalada, la app funciona **sin conexión a internet**. Todos los datos se guardan localmente en tu dispositivo.
