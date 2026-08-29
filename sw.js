@@ -1,4 +1,4 @@
-const CACHE = 'market-shopping-v1';
+const CACHE = 'market-shopping-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -16,22 +16,44 @@ const ASSETS = [
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (e) => {
+  const req = e.request;
+
+  // Navegación (HTML): siempre intenta red primero, cae al cache si offline
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req).then((res) => {
+        const clone = res.clone();
+        caches.open(CACHE).then((cache) => cache.put('/index.html', clone));
+        return res;
+      }).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Assets estáticos: cache primero, actualiza en segundo plano
   e.respondWith(
-    caches.match(e.request).then((r) => r || fetch(e.request).catch(() => caches.match('/index.html')))
+    caches.match(req).then((cached) => {
+      const fetchPromise = fetch(req).then((res) => {
+        if (res && res.status === 200) {
+          const clone = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, clone));
+        }
+        return res;
+      }).catch(() => cached);
+      return cached || fetchPromise;
+    })
   );
 });
