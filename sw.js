@@ -9,7 +9,7 @@ const ASSETS = [
   '/assets/fonts/Roboto-300.ttf',
   '/assets/fonts/Roboto-400.ttf',
   '/assets/fonts/Roboto-500.ttf',
-  '/assets/fonts/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWuaabWmT.ttf',
+  '/assets/fonts/MaterialIcons-Regular.woff2',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png'
 ];

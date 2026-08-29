@@ -22,7 +22,7 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url('KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWuaabWmT.ttf') format('truetype');
+  src: url('MaterialIcons-Regular.woff2') format('woff2');
 }
 
 /* Ensure material icons class uses the font */
