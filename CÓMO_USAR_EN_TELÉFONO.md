@@ -180,3 +180,20 @@ La app ahora es una **Progressive Web App (PWA)**, lo que significa que se ve y 
 
 ### ✅ Totalmente Offline
 Una vez instalada, la app funciona **sin conexión a internet**. Todos los datos se guardan localmente en tu dispositivo.
+
+---
+
+## 💾 Datos en JSON
+
+La app guarda toda la información en JSON para que sea fácil de actualizar y reutilizar.
+
+### Mercados (mercados.json)
+- El archivo `mercados.json` contiene la lista de mercados base. **Edítalo directamente** para agregar o eliminar mercados de la lista (ej: `"Plazas", "NuevoMercado"`).
+- Los mercados agregados desde la app se guardan aparte como "Personalizados".
+- Para eliminar un mercado personalizado: configuración → botón del automercado (+) → lista → botón eliminar.
+
+### Compras (Exportar / Importar)
+- **Exportar JSON**: descarga un archivo `.json` con todas tus compras y mercados personalizados. Útil para respaldo o para mover datos a otro dispositivo.
+- **Importar JSON**: carga un archivo `.json` exportado y restaura los datos.
+- Botones en la sección "💾 Datos (JSON)" al final de la página.
+- También puedes eliminar compras individuales desde "📋 Ver Compras".

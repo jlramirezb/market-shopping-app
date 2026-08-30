@@ -4,7 +4,7 @@ class MarketShoppingApp {
         this.compras = [];
         this.mercadosPredefinidos = [
             "La Granja",
-            "Chacal", 
+            "Chacal",
             "Kromi",
             "Catania",
             "Luxor",
@@ -23,8 +23,26 @@ class MarketShoppingApp {
         this.cargarMercadosPersonalizados();
         this.configurarEventos();
         this.configurarFechaActual();
-        this.cargarMercadosEnSelector();
+        this.cargarMercadosPredefinidos().then(() => {
+            this.cargarMercadosEnSelector();
+        });
         this.actualizarTotales();
+    }
+
+    cargarMercadosPredefinidos() {
+        return fetch('mercados.json')
+            .then((res) => res.json())
+            .then((data) => {
+                if (data && Array.isArray(data.mercadosPredefinidos) && data.mercadosPredefinidos.length > 0) {
+                    this.mercadosPredefinidos = data.mercadosPredefinidos;
+                }
+                // Cargar el selector una vez se tenga la lista
+                this.cargarMercadosEnSelector();
+            })
+            .catch(() => {
+                // Si no se puede cargar el archivo JSON, usar la lista por defecto
+                this.cargarMercadosEnSelector();
+            });
     }
 
     configurarEventos() {
@@ -51,6 +69,11 @@ class MarketShoppingApp {
         document.getElementById('btnCancelarAgregarMercado').addEventListener('click', () => this.cerrarModalAgregarMercado());
         document.getElementById('btnAceptarAgregarMercado').addEventListener('click', () => this.agregarNuevoMercado());
         document.getElementById('btnAgregarMercado').addEventListener('click', () => this.mostrarModalAgregarMercado());
+
+        // Exportar / Importar datos en JSON
+        document.getElementById('btnExportar').addEventListener('click', () => this.exportarDatos());
+        document.getElementById('btnImportar').addEventListener('click', () => document.getElementById('inputImportar').click());
+        document.getElementById('inputImportar').addEventListener('change', (e) => this.importarDatos(e));
 
         // Eventos para validación de configuración
         document.getElementById('tasaCambio').addEventListener('input', () => this.verificarConfiguracion());
@@ -439,8 +462,13 @@ class MarketShoppingApp {
 
         contenedor.innerHTML = this.compras.map((compra, index) => `
             <div class="compra-item" onclick="app.mostrarDetalleCompra(${index})">
-                <div class="compra-header">
-                    📅 ${this.formatearFecha(compra.fecha)} - 🏪 ${compra.automercado}
+                <div class="compra-item-top">
+                    <div class="compra-header">
+                        📅 ${this.formatearFecha(compra.fecha)} - 🏪 ${compra.automercado}
+                    </div>
+                    <button class="btn-eliminar" onclick="event.stopPropagation(); app.eliminarCompra(${index})" title="Eliminar compra">
+                        <span class="material-icons">delete</span>
+                    </button>
                 </div>
                 <div class="compra-details">
                     📦 ${compra.productos.length} productos | 💱 Tasa: ${compra.tasaCambio}
@@ -451,6 +479,18 @@ class MarketShoppingApp {
                 </div>
             </div>
         `).join('');
+    }
+
+    eliminarCompra(index) {
+        const compra = this.compras[index];
+        if (!compra) return;
+
+        if (!confirm(`¿Eliminar la compra del ${this.formatearFecha(compra.fecha)} en ${compra.automercado}?`)) return;
+
+        this.compras.splice(index, 1);
+        this.guardarComprasEnStorage();
+        this.mostrarListaCompras();
+        this.mostrarMensaje('Compra eliminada', 'success');
     }
 
     mostrarDetalleCompra(index) {
@@ -609,9 +649,124 @@ class MarketShoppingApp {
         });
     }
 
+    // Exportar todos los datos a un archivo JSON
+    exportarDatos() {
+        const datos = {
+            version: 1,
+            exportado: new Date().toISOString(),
+            compras: this.compras,
+            mercadosPersonalizados: this.mercadosPersonalizados
+        };
+
+        const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `market-shopping-datos-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        this.mostrarMensaje('Datos exportados a JSON', 'success');
+    }
+
+    // Importar datos desde un archivo JSON
+    importarDatos(event) {
+        const archivo = event.target.files[0];
+        if (!archivo) return;
+
+        const lector = new FileReader();
+        lector.onload = (e) => {
+            try {
+                const datos = JSON.parse(e.target.result);
+
+                if (!datos || typeof datos !== 'object') {
+                    throw new Error('Formato no válido');
+                }
+
+                if (Array.isArray(datos.compras)) {
+                    this.compras = datos.compras;
+                    this.guardarComprasEnStorage();
+                }
+
+                if (Array.isArray(datos.mercadosPersonalizados)) {
+                    this.mercadosPersonalizados = datos.mercadosPersonalizados;
+                    this.guardarMercadosPersonalizados();
+                    this.cargarMercadosEnSelector();
+                }
+
+                this.mostrarListaCompras();
+                this.mostrarMensaje('Datos importados correctamente', 'success');
+            } catch (err) {
+                this.mostrarMensaje('Archivo JSON no válido', 'error');
+            }
+        };
+        lector.readAsText(archivo);
+
+        // Resetear el input para permitir importar el mismo archivo de nuevo
+        event.target.value = '';
+    }
+
     mostrarModalAgregarMercado() {
+        this.actualizarListaMercadosModal();
         document.getElementById('modalAgregarMercado').style.display = 'block';
         document.getElementById('nombreNuevoMercado').focus();
+    }
+
+    actualizarListaMercadosModal() {
+        const contenedor = document.getElementById('listaMercadosGestion');
+        if (!contenedor) return;
+
+        const todos = [...this.mercadosPredefinidos, ...this.mercadosPersonalizados];
+
+        if (todos.length === 0) {
+            contenedor.innerHTML = '<p class="empty-message">No hay mercados</p>';
+            return;
+        }
+
+        contenedor.innerHTML = todos.map((nombre) => {
+            const esPersonalizado = this.mercadosPersonalizados.includes(nombre);
+            return `
+                <div class="mercado-gestion-item">
+                    <span>${nombre}${esPersonalizado ? '<small> (Personalizado)</small>' : ''}</span>
+                    <button class="btn-eliminar btn-small-eliminar" data-mercado="${nombre.replace(/"/g, '&quot;')}" title="Eliminar mercado">
+                        <span class="material-icons">delete</span>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        contenedor.querySelectorAll('.btn-small-eliminar').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const nombre = btn.getAttribute('data-mercado');
+                this.eliminarMercado(nombre);
+            });
+        });
+    }
+
+    eliminarMercado(nombre) {
+        // Solo se permiten eliminar mercados personalizados desde la app.
+        // Para eliminar mercados predefinidos, edita el archivo mercados.json.
+        if (!this.mercadosPersonalizados.includes(nombre)) {
+            this.mostrarMensaje('Los mercados de la lista base se editan en mercados.json', 'info');
+            return;
+        }
+
+        if (!confirm(`¿Eliminar el mercado "${nombre}"?`)) return;
+
+        this.mercadosPersonalizados = this.mercadosPersonalizados.filter(m => m !== nombre);
+        this.guardarMercadosPersonalizados();
+
+        // Si el mercado seleccionado fue eliminado, limpiar el selector
+        if (document.getElementById('automercado').value === nombre) {
+            document.getElementById('automercado').value = '';
+            this.verificarConfiguracion();
+        }
+
+        this.cargarMercadosEnSelector();
+        this.actualizarListaMercadosModal();
+        this.mostrarMensaje('Mercado eliminado', 'success');
     }
 
     cerrarModalAgregarMercado() {

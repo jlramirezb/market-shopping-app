@@ -1,10 +1,11 @@
-const CACHE = 'market-shopping-v2';
+const CACHE = 'market-shopping-v3';
 const ASSETS = [
   '/',
   '/index.html',
   '/styles.css',
   '/script.js',
   '/manifest.json',
+  '/mercados.json',
   '/assets/fonts/fonts.css',
   '/assets/fonts/Roboto-300.ttf',
   '/assets/fonts/Roboto-400.ttf',

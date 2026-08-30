@@ -88,6 +88,23 @@
                     Ver Compras
                 </button>
             </div>
+
+            <!-- Exportar / Importar datos -->
+            <section class="card data-card">
+                <h2>💾 Datos (JSON)</h2>
+                <p class="data-help">Exporta tus datos a un archivo JSON o impórtalos desde uno.</p>
+                <div class="action-buttons">
+                    <button id="btnExportar" class="btn btn-secondary">
+                        <span class="material-icons">download</span>
+                        Exportar JSON
+                    </button>
+                    <button id="btnImportar" class="btn btn-secondary">
+                        <span class="material-icons">upload</span>
+                        Importar JSON
+                    </button>
+                    <input type="file" id="inputImportar" accept=".json,application/json" style="display:none;">
+                </div>
+            </section>
         </main>
     </div>
 
@@ -205,7 +222,7 @@
     <div id="modalAgregarMercado" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>🏪 Agregar Nuevo Automercado</h3>
+                <h3>🏪 Gestionar Automercados</h3>
                 <span class="close-agregar-mercado">&times;</span>
             </div>
             <div class="modal-body">
@@ -214,9 +231,16 @@
                     <input type="text" id="nombreNuevoMercado" placeholder="Ej: Mi Mercado Local" required>
                     <small class="form-help">Ingrese el nombre del nuevo automercado que desea agregar</small>
                 </div>
+                <div class="form-group">
+                    <label>Mercados existentes:</label>
+                    <div id="listaMercadosGestion" class="mercados-gestion-list">
+                        <p class="empty-message">Cargando...</p>
+                    </div>
+                    <small class="form-help">Los mercados "(Personalizado)" se pueden eliminar aquí. La lista base se edita en mercados.json</small>
+                </div>
             </div>
             <div class="modal-footer">
-                <button id="btnCancelarAgregarMercado" class="btn btn-secondary">Cancelar</button>
+                <button id="btnCancelarAgregarMercado" class="btn btn-secondary">Cerrar</button>
                 <button id="btnAceptarAgregarMercado" class="btn btn-primary">Agregar</button>
             </div>
         </div>
