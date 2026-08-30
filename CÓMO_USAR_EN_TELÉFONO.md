@@ -12,6 +12,20 @@
 - Teléfono conectado a la misma red WiFi
 - Python instalado (o Node.js)
 
+### 🔥 Servidor con guardado en JSON (server.py)
+Este servidor sirve la app **y además guarda los datos en archivos JSON reales** de tu PC:
+- `compras.json` → todas las compras
+- `mercados-personalizados.json` → los mercados que agregas desde la app
+
+**Ejecutar:**
+```bash
+cd C:\Users\USUARIO\Documents\repo\market-shopping-app
+python server.py
+```
+Luego abre `http://localhost:8000` (PC) o `http://[IP-DE-TU-PC]:8000` (teléfono).
+
+> 💡 **Importante:** este servidor guarda los JSON en tu PC. Si cierras el servidor o apagas la PC, la app sigue funcionando guardando en el dispositivo (localStorage).
+
 ### Pasos:
 
 #### **En tu computadora:**

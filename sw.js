@@ -31,6 +31,13 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;
+  const url = new URL(req.url);
+
+  // Las rutas /api/ siempre van a la red (nunca a cache)
+  if (url.pathname.startsWith('/api/')) {
+    e.respondWith(fetch(req).catch(() => new Response('{}', { status: 503 })));
+    return;
+  }
 
   // Navegación (HTML): siempre intenta red primero, cae al cache si offline
   if (req.mode === 'navigate') {

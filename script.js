@@ -27,6 +27,9 @@ class MarketShoppingApp {
             this.cargarMercadosEnSelector();
         });
         this.actualizarTotales();
+        // Intentar cargar datos desde el servidor si esta disponible
+        this.cargarComprasServidor();
+        this.cargarMercadosServidor();
     }
 
     cargarMercadosPredefinidos() {
@@ -591,8 +594,39 @@ class MarketShoppingApp {
     }
 
     // Métodos de almacenamiento
+
+    // Comprueba si el servidor local esta disponible (para guardar en JSON)
+    servidorDisponible() {
+        return new Promise((resolve) => {
+            // Si ya lo comprobamos, usamos el resultado cacheado
+            if (this._servidorOk !== undefined) {
+                resolve(this._servidorOk);
+                return;
+            }
+            fetch('/api/compras', { method: 'GET' })
+                .then((res) => {
+                    this._servidorOk = res.ok;
+                    resolve(this._servidorOk);
+                })
+                .catch(() => {
+                    this._servidorOk = false;
+                    resolve(false);
+                });
+        });
+    }
+
+    // Envia las compras al servidor (si esta disponible) y las guarda en localStorage
     guardarComprasEnStorage() {
         localStorage.setItem('marketShopping_compras', JSON.stringify(this.compras));
+        this.servidorDisponible().then((ok) => {
+            if (ok) {
+                fetch('/api/compras', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ compras: this.compras })
+                }).catch(() => {});
+            }
+        });
     }
 
     cargarComprasGuardadas() {
@@ -600,6 +634,22 @@ class MarketShoppingApp {
         if (guardadas) {
             this.compras = JSON.parse(guardadas);
         }
+    }
+
+    // Intentar cargar las compras desde el servidor (si esta disponible)
+    cargarComprasServidor() {
+        this.servidorDisponible().then((ok) => {
+            if (!ok) return;
+            fetch('/api/compras')
+                .then((res) => res.json())
+                .then((data) => {
+                    if (Array.isArray(data)) {
+                        this.compras = data;
+                        localStorage.setItem('marketShopping_compras', JSON.stringify(this.compras));
+                    }
+                })
+                .catch(() => {});
+        });
     }
 
     // Métodos de utilidad
@@ -626,6 +676,32 @@ class MarketShoppingApp {
 
     guardarMercadosPersonalizados() {
         localStorage.setItem('marketShopping_mercados', JSON.stringify(this.mercadosPersonalizados));
+        this.servidorDisponible().then((ok) => {
+            if (ok) {
+                fetch('/api/mercados', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mercados: this.mercadosPersonalizados })
+                }).catch(() => {});
+            }
+        });
+    }
+
+    // Intentar cargar los mercados personalizados desde el servidor
+    cargarMercadosServidor() {
+        this.servidorDisponible().then((ok) => {
+            if (!ok) return;
+            fetch('/api/mercados')
+                .then((res) => res.json())
+                .then((data) => {
+                    if (Array.isArray(data)) {
+                        this.mercadosPersonalizados = data;
+                        localStorage.setItem('marketShopping_mercados', JSON.stringify(this.mercadosPersonalizados));
+                        this.cargarMercadosEnSelector();
+                    }
+                })
+                .catch(() => {});
+        });
     }
 
     cargarMercadosEnSelector() {
