@@ -26,10 +26,33 @@ class MarketShoppingApp {
         this.cargarMercadosPredefinidos().then(() => {
             this.cargarMercadosEnSelector();
         });
+        this.cargarUltimaCompra();
         this.actualizarTotales();
         // Intentar cargar datos desde el servidor si esta disponible
         this.cargarComprasServidor();
         this.cargarMercadosServidor();
+    }
+
+    // Carga los productos de la ultima compra en el formulario para agilizar una nueva compra
+    cargarUltimaCompra() {
+        if (this.compras.length === 0) return;
+        // La ultima compra es la de mayor fechaGuardado
+        const ultima = this.compras.reduce((a, b) =>
+            new Date(a.fechaGuardado) > new Date(b.fechaGuardado) ? a : b
+        );
+
+        if (ultima && Array.isArray(ultima.productos)) {
+            this.productos = ultima.productos.map(p => ({
+                id: Date.now() + Math.random(),
+                nombre: p.nombre,
+                precio: p.precio,
+                cantidad: p.cantidad,
+                tipoMedida: p.tipoMedida || 'unidad',
+                tipoMoneda: p.tipoMoneda || 'dolar'
+            }));
+            this.actualizarListaProductos();
+            this.actualizarTotales();
+        }
     }
 
     cargarMercadosPredefinidos() {
