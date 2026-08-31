@@ -343,10 +343,12 @@ body {
     display: flex;
     gap: 10px;
     align-items: center;
+    width: 100%;
 }
 
 .mercado-selector select {
     flex: 1;
+    min-width: 0;
     padding: 12px;
     border: 2px solid #e2e8f0;
     border-radius: 8px;
@@ -359,6 +361,11 @@ body {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.mercado-selector .btn {
+    flex-shrink: 0;
+    padding: 8px 10px;
 }
 
 .btn-small {
@@ -575,5 +582,15 @@ body {
         width: 95%;
         margin: 2% auto;
         max-height: 90vh;
+    }
+
+    .mercado-selector .btn {
+        flex-shrink: 0;
+        padding: 8px;
+    }
+
+    .mercado-selector select {
+        font-size: 15px;
+        padding: 10px;
     }
 }
