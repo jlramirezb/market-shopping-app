@@ -1,4 +1,4 @@
-const CACHE = 'market-shopping-v3';
+const CACHE = 'market-shopping-v4';
 const ASSETS = [
   '/',
   '/index.html',
