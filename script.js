@@ -76,6 +76,13 @@ class MarketShoppingApp {
         document.getElementById('btnAgregarProducto').addEventListener('click', () => this.validarConfiguracionInicial());
         document.getElementById('btnGuardar').addEventListener('click', () => this.guardarCompra());
         document.getElementById('btnCargar').addEventListener('click', () => this.mostrarModalCompras());
+        document.getElementById('btnDashboard').addEventListener('click', () => this.mostrarDashboard());
+
+        // Modal de dashboard
+        document.querySelector('.close-dashboard').addEventListener('click', () => this.cerrarDashboard());
+        document.getElementById('btnCerrarDashboard').addEventListener('click', () => this.cerrarDashboard());
+        document.getElementById('filtroTexto').addEventListener('input', () => this.renderTablaCompras());
+        document.getElementById('filtroMercado').addEventListener('change', () => this.renderTablaCompras());
 
         // Modal de producto
         document.querySelector('.close').addEventListener('click', () => this.cerrarModalProducto());
@@ -805,6 +812,188 @@ class MarketShoppingApp {
 
         // Resetear el input para permitir importar el mismo archivo de nuevo
         event.target.value = '';
+    }
+
+    // ====== DASHBOARD ======
+    mostrarDashboard() {
+        document.getElementById('modalDashboard').style.display = 'block';
+        this.renderResumenDashboard();
+        this.renderGraficoFechas();
+        this.renderGraficoMercados();
+        this.cargarFiltroMercados();
+        this.renderTablaCompras();
+    }
+
+    cerrarDashboard() {
+        document.getElementById('modalDashboard').style.display = 'none';
+    }
+
+    renderResumenDashboard() {
+        const cont = document.getElementById('dashboardResumen');
+        if (this.compras.length === 0) {
+            cont.innerHTML = '<p class="empty-message">No hay compras para mostrar</p>';
+            return;
+        }
+
+        let totalUsd = 0, totalBs = 0;
+        const mercadoConteo = {};
+        const productoConteo = {};
+
+        this.compras.forEach(c => {
+            const tasa = c.tasaCambio || 1;
+            totalUsd += c.totalDolares;
+            totalBs += c.totalBolivares;
+            mercadoConteo[c.automercado] = (mercadoConteo[c.automercado] || 0) + 1;
+            (c.productos || []).forEach(p => {
+                productoConteo[p.nombre] = (productoConteo[p.nombre] || 0) + p.cantidad;
+            });
+        });
+
+        const mercadoMas = Object.keys(mercadoConteo).sort((a, b) => mercadoConteo[b] - mercadoConteo[a])[0];
+        const productoMas = Object.keys(productoConteo).sort((a, b) => productoConteo[b] - productoConteo[a])[0];
+
+        cont.innerHTML = `
+            <div class="resumen-grid">
+                <div class="resumen-item"><span>Compras</span><strong>${this.compras.length}</strong></div>
+                <div class="resumen-item"><span>Total ($)</span><strong>$${totalUsd.toFixed(2)}</strong></div>
+                <div class="resumen-item"><span>Total (Bs)</span><strong>Bs${totalBs.toFixed(2)}</strong></div>
+                <div class="resumen-item"><span>Mercado + usado</span><strong title="${mercadoMas}">${mercadoMas || '-'}</strong></div>
+                <div class="resumen-item"><span>Producto + comprado</span><strong title="${productoMas}">${productoMas || '-'}</strong></div>
+            </div>
+        `;
+    }
+
+    // Grafico de barras simple con CSS
+    renderGraficoFechas() {
+        const cont = document.getElementById('graficoFechas');
+        if (this.compras.length === 0) {
+            cont.innerHTML = '<p class="empty-message">Sin datos</p>';
+            return;
+        }
+
+        // Agrupar total por fecha
+        const porFecha = {};
+        this.compras.forEach(c => {
+            const f = this.formatearFecha(c.fecha);
+            porFecha[f] = (porFecha[f] || 0) + c.totalDolares;
+        });
+
+        const fechas = Object.keys(porFecha);
+        const max = Math.max(...Object.values(porFecha));
+
+        cont.innerHTML = fechas.map(f => {
+            const h = max > 0 ? Math.round((porFecha[f] / max) * 100) : 0;
+            return `
+                <div class="bar-row">
+                    <span class="bar-label">${f}</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width:${h}%"></div>
+                    </div>
+                    <span class="bar-value">$${porFecha[f].toFixed(2)}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    renderGraficoMercados() {
+        const cont = document.getElementById('graficoMercados');
+        if (this.compras.length === 0) {
+            cont.innerHTML = '<p class="empty-message">Sin datos</p>';
+            return;
+        }
+
+        const porMercado = {};
+        this.compras.forEach(c => {
+            porMercado[c.automercado] = (porMercado[c.automercado] || 0) + c.totalDolares;
+        });
+
+        const mercados = Object.keys(porMercado);
+        const max = Math.max(...Object.values(porMercado));
+
+        cont.innerHTML = mercados.map(m => {
+            const h = max > 0 ? Math.round((porMercado[m] / max) * 100) : 0;
+            return `
+                <div class="bar-row">
+                    <span class="bar-label">${m}</span>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-fill-alter" style="width:${h}%"></div>
+                    </div>
+                    <span class="bar-value">$${porMercado[m].toFixed(2)}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    cargarFiltroMercados() {
+        const select = document.getElementById('filtroMercado');
+        const mercados = [...new Set(this.compras.map(c => c.automercado))];
+        select.innerHTML = '<option value="">Todos los mercados</option>';
+        mercados.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            select.appendChild(opt);
+        });
+    }
+
+    renderTablaCompras() {
+        const cont = document.getElementById('tablaCompras');
+        const texto = (document.getElementById('filtroTexto').value || '').toLowerCase();
+        const mercado = document.getElementById('filtroMercado').value;
+
+        if (this.compras.length === 0) {
+            cont.innerHTML = '<p class="empty-message">No hay compras guardadas</p>';
+            return;
+        }
+
+        let filtradas = this.compras;
+        if (mercado) filtradas = filtradas.filter(c => c.automercado === mercado);
+        if (texto) {
+            filtradas = filtradas.filter(c =>
+                c.automercado.toLowerCase().includes(texto) ||
+                this.formatearFecha(c.fecha).toLowerCase().includes(texto)
+            );
+        }
+
+        if (filtradas.length === 0) {
+            cont.innerHTML = '<p class="empty-message">Sin resultados</p>';
+            return;
+        }
+
+        // Ordenar por fecha mas reciente
+        const ordenadas = [...filtradas].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        cont.innerHTML = `
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Mercado</th>
+                        <th>Productos</th>
+                        <th>Total ($)</th>
+                        <th>Total (Bs)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${ordenadas.map((c, i) => `
+                        <tr class="tabla-row" data-idx="${this.compras.indexOf(c)}">
+                            <td>${this.formatearFecha(c.fecha)}</td>
+                            <td>${c.automercado}</td>
+                            <td>${(c.productos || []).length}</td>
+                            <td>$${c.totalDolares.toFixed(2)}</td>
+                            <td>Bs${c.totalBolivares.toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+
+        cont.querySelectorAll('.tabla-row').forEach(row => {
+            row.addEventListener('click', () => {
+                const idx = parseInt(row.getAttribute('data-idx'), 10);
+                this.mostrarDetalleCompra(idx);
+            });
+        });
     }
 
     mostrarModalAgregarMercado() {

@@ -87,6 +87,10 @@
                     <span class="material-icons">folder_open</span>
                     Ver Compras
                 </button>
+                <button id="btnDashboard" class="btn btn-secondary">
+                    <span class="material-icons">insights</span>
+                    Dashboard
+                </button>
             </div>
 
             <!-- Exportar / Importar datos -->
@@ -257,6 +261,47 @@
                 <div id="listaCompras" class="compras-list">
                     <p class="empty-message">No hay compras guardadas</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Dashboard -->
+    <div id="modalDashboard" class="modal">
+        <div class="modal-content dashboard-modal">
+            <div class="modal-header">
+                <h3>📊 Dashboard</h3>
+                <span class="close-dashboard">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Resumen -->
+                <div id="dashboardResumen" class="dashboard-resumen"></div>
+
+                <!-- Gráficos -->
+                <div class="dashboard-graficos">
+                    <div class="grafico-card">
+                        <h4>📈 Gasto por Fecha</h4>
+                        <div id="graficoFechas" class="chart"></div>
+                    </div>
+                    <div class="grafico-card">
+                        <h4>🏪 Gasto por Automercado</h4>
+                        <div id="graficoMercados" class="chart"></div>
+                    </div>
+                </div>
+
+                <!-- Tabla de compras -->
+                <div class="grafico-card">
+                    <h4>🧾 Historial de Compras</h4>
+                    <div class="dashboard-filtros">
+                        <input type="text" id="filtroTexto" placeholder="Buscar mercado o fecha..." class="dashboard-buscar">
+                        <select id="filtroMercado" class="dashboard-select">
+                            <option value="">Todos los mercados</option>
+                        </select>
+                    </div>
+                    <div id="tablaCompras" class="dashboard-tabla"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCerrarDashboard" class="btn btn-secondary">Cerrar</button>
             </div>
         </div>
     </div>
