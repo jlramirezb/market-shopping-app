@@ -720,7 +720,7 @@ class MarketShoppingApp {
         this.mercadosPersonalizados.forEach(mercado => {
             const option = document.createElement('option');
             option.value = mercado;
-            option.textContent = `${mercado} (Personalizado)`;
+            option.textContent = mercado;
             selector.appendChild(option);
         });
     }
@@ -802,10 +802,9 @@ class MarketShoppingApp {
         }
 
         contenedor.innerHTML = todos.map((nombre) => {
-            const esPersonalizado = this.mercadosPersonalizados.includes(nombre);
             return `
                 <div class="mercado-gestion-item">
-                    <span>${nombre}${esPersonalizado ? '<small> (Personalizado)</small>' : ''}</span>
+                    <span>${nombre}</span>
                     <button class="btn-eliminar btn-small-eliminar" data-mercado="${nombre.replace(/"/g, '&quot;')}" title="Eliminar mercado">
                         <span class="material-icons">delete</span>
                     </button>
